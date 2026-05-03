@@ -17,9 +17,6 @@ def calculate_stats(sequence: str) -> dict:
     stats['gc_ratio_A'] = gc
     return stats
 
-
-if __name__ == "__main__":
-    pass
     
 def insert_name(sequence: str, name: str) -> str:
     """Inserts a name at a random position in the sequence.
@@ -56,3 +53,34 @@ def validate_positive_int(prompt: str, min_val: int = 1, max_val: int = 100_000)
                 print(f"Error: value must be an integer in the range [{min_val}, {max_val}].")
         except ValueError:
             print(f"Error: value must be an integer in the range [{min_val}, {max_val}].")
+
+def validate_id(prompt: str) -> str:
+    """Gets a sequence ID from the user.
+    Repeats the prompt if the ID contains whitespace or is empty."""
+    while True:
+        seq_id = input(prompt).strip()
+        if not seq_id:
+            print("Error: ID cannot be empty.")
+        elif any(c.isspace() for c in seq_id):
+            print("Error: ID cannot contain whitespace.")
+        else:
+            return seq_id
+
+
+def main():
+    """Main program flow."""
+    print("=" * 50)
+    print("  DNA Sequence Generator — FASTA format")
+    print("=" * 50)
+
+    # Get sequence length from user (with validation)
+    length = validate_positive_int("Enter sequence length: ")
+
+    # Get sequence ID (no whitespace allowed)
+    seq_id = validate_id("Enter sequence ID: ")
+
+    # Description is optional
+    description = input("Enter a description of the sequence (optional): ").strip()
+
+    # Name to embed inside the sequence
+    name = input("Enter your name: ").strip()
