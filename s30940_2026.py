@@ -84,3 +84,22 @@ def main():
 
     # Name to embed inside the sequence
     name = input("Enter your name: ").strip()
+    # Generate the DNA sequence
+    sequence = generate_sequence(length)
+
+    # Embed user's name at a random position (lowercase, not counted in stats)
+    sequence_with_name = insert_name(sequence, name)
+
+    # Format as FASTA and save to file
+    fasta_content = format_fasta(seq_id, description, sequence_with_name)
+    filename = f"{seq_id}.fasta"
+    with open(filename, 'w') as f:
+        f.write(fasta_content)
+    print(f"\nSequence saved to file: {filename}")
+
+    # Calculate and print statistics (on clean sequence, without embedded name)
+    stats = calculate_stats(sequence)
+    print(f"\nSequence statistics (n={length}):")
+    for nuc in ['A', 'C', 'G', 'T']:
+        print(f"  {nuc}: {stats[nuc]:.2f}%")
+    print(f"  GC-content: {stats['GC']:.2f}%")
