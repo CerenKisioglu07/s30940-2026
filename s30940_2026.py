@@ -132,3 +132,63 @@ def main():
             f.write("\n")
             f.write(format_fasta(f"{seq_id}_REVCOMP", "Reverse complementary strand", rev_comp))
         print(f"Complementary sequences saved to: {comp_filename}")
+     # --- Feature 5: In silico transcription (DNA -> mRNA) ---
+    if input("\nGenerate mRNA (transcription)? (y/n): ").strip().lower() == 'y':
+        mrna = sequence.replace('T', 'U')
+        mrna_filename = f"{seq_id}_mRNA.fasta"
+        with open(mrna_filename, 'w') as f:
+            f.write(format_fasta(f"{seq_id}_mRNA", "In silico transcription", mrna))
+        print(f"mRNA saved to: {mrna_filename}")
+
+    # --- Feature 6: Translation (DNA -> protein) ---
+    CODON_TABLE = {
+        'TTT': 'F', 'TTC': 'F', 'TTA': 'L', 'TTG': 'L',
+        'CTT': 'L', 'CTC': 'L', 'CTA': 'L', 'CTG': 'L',
+        'ATT': 'I', 'ATC': 'I', 'ATA': 'I', 'ATG': 'M',
+        'GTT': 'V', 'GTC': 'V', 'GTA': 'V', 'GTG': 'V',
+        'TCT': 'S', 'TCC': 'S', 'TCA': 'S', 'TCG': 'S',
+        'CCT': 'P', 'CCC': 'P', 'CCA': 'P', 'CCG': 'P',
+        'ACT': 'T', 'ACC': 'T', 'ACA': 'T', 'ACG': 'T',
+        'GCT': 'A', 'GCC': 'A', 'GCA': 'A', 'GCG': 'A',
+        'TAT': 'Y', 'TAC': 'Y', 'TAA': '*', 'TAG': '*',
+        'CAT': 'H', 'CAC': 'H', 'CAA': 'Q', 'CAG': 'Q',
+        'AAT': 'N', 'AAC': 'N', 'AAA': 'K', 'AAG': 'K',
+        'GAT': 'D', 'GAC': 'D', 'GAA': 'E', 'GAG': 'E',
+        'TGT': 'C', 'TGC': 'C', 'TGA': '*', 'TGG': 'W',
+        'CGT': 'R', 'CGC': 'R', 'CGA': 'R', 'CGG': 'R',
+        'AGT': 'S', 'AGC': 'S', 'AGA': 'R', 'AGG': 'R',
+        'GGT': 'G', 'GGC': 'G', 'GGA': 'G', 'GGG': 'G',
+    }
+
+    if input("\nTranslate to protein? (y/n): ").strip().lower() == 'y':
+        protein = []
+        for i in range(0, len(sequence) - 2, 3):
+            codon = sequence[i:i + 3]
+            aa = CODON_TABLE.get(codon, '?')
+            if aa == '*':
+                protein.append('*')
+                break
+            protein.append(aa)
+        print(f"Protein sequence: {''.join(protein)}")
+
+    # --- Feature 9: ORF detection ---
+    STOP_CODONS = {'TAA', 'TAG', 'TGA'}
+
+    if input("\nSearch for ORFs? (y/n): ").strip().lower() == 'y':
+        min_orf = validate_positive_int("Minimum ORF length (nt): ", min_val=3, max_val=length)
+        orfs = []
+        for i in range(len(sequence) - 2):
+            if sequence[i:i + 3] == 'ATG':
+                for j in range(i + 3, len(sequence) - 2, 3):
+                    codon = sequence[j:j + 3]
+                    if codon in STOP_CODONS:
+                        orf_seq = sequence[i:j + 3]
+                        if len(orf_seq) >= min_orf:
+                            orfs.append({'start': i + 1, 'end': j + 3, 'length': len(orf_seq)})
+                        break
+        if orfs:
+            print(f"Found {len(orfs)} ORF(s):")
+            for orf in orfs:
+                print(f"  Start: {orf['start']}, End: {orf['end']}, Length: {orf['length']} nt")
+        else:
+            print("No ORFs found.")
