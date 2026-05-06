@@ -103,3 +103,32 @@ def main():
     for nuc in ['A', 'C', 'G', 'T']:
         print(f"  {nuc}: {stats[nuc]:.2f}%")
     print(f"  GC-content: {stats['GC']:.2f}%")
+
+# --- Feature 3: Motif search ---
+    if input("\nSearch for a motif? (y/n): ").strip().lower() == 'y':
+        motif = input("Enter motif (e.g. ATG): ").strip().upper()
+        positions = []
+        start = 0
+        while True:
+            pos = sequence.find(motif, start)
+            if pos == -1:
+                break
+            positions.append(pos + 1)  # 1-based biological convention
+            start = pos + 1
+        if positions:
+            print(f"Motif '{motif}' found at positions: {positions}")
+        else:
+            print(f"Motif '{motif}' not found.")
+
+    # --- Feature 4: Complementary & reverse complementary ---
+    COMPLEMENT_MAP = str.maketrans('ACGTacgt', 'TGCAtgca')
+
+    if input("\nGenerate complementary sequences? (y/n): ").strip().lower() == 'y':
+        comp = sequence.translate(COMPLEMENT_MAP)
+        rev_comp = comp[::-1]
+        comp_filename = f"{seq_id}_complement.fasta"
+        with open(comp_filename, 'w') as f:
+            f.write(format_fasta(f"{seq_id}_COMP", "Complementary strand", comp))
+            f.write("\n")
+            f.write(format_fasta(f"{seq_id}_REVCOMP", "Reverse complementary strand", rev_comp))
+        print(f"Complementary sequences saved to: {comp_filename}")
