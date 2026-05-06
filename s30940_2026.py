@@ -1,3 +1,7 @@
+
+# Album number: s30940
+# Date: 2026-05-06
+# Description: DNA sequence generator and analysis tool for Bioinformatics.
 import random
 
 
@@ -13,8 +17,7 @@ def calculate_stats(sequence: str) -> dict:
     counts = {nuc: sequence.count(nuc) for nuc in ['A', 'C', 'G', 'T']}
     stats = {nuc: round(counts[nuc] / length * 100, 2) for nuc in ['A', 'C', 'G', 'T']}
     gc = round((counts['G'] + counts['C']) / length * 100, 2)
-    stats['GC'] = gc
-    stats['gc_ratio_A'] = gc
+    stats['gc_ratio_A'] = round((counts['G'] + counts['C']) / length * 100, 2)
     return stats
 
     
@@ -102,7 +105,7 @@ def main():
     print(f"\nSequence statistics (n={length}):")
     for nuc in ['A', 'C', 'G', 'T']:
         print(f"  {nuc}: {stats[nuc]:.2f}%")
-    print(f"  GC-content: {stats['GC']:.2f}%")
+    print(f"  GC-content: {stats['gc_ratio_A']:.2f}%")
 
 # --- Feature 3: Motif search ---
     if input("\nSearch for a motif? (y/n): ").strip().lower() == 'y':
