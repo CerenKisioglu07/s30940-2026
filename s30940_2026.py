@@ -192,3 +192,58 @@ def main():
                 print(f"  Start: {orf['start']}, End: {orf['end']}, Length: {orf['length']} nt")
         else:
             print("No ORFs found.")
+    # --- Feature 7 & 8: Sliding window GC analysis + HTML chart ---
+    if input("\nRun sliding window GC analysis? (y/n): ").strip().lower() == 'y':
+        import csv
+        window = validate_positive_int("Window size (nt): ", min_val=1, max_val=length)
+        step = validate_positive_int("Step size (nt): ", min_val=1, max_val=window)
+
+        # Calculate GC per window
+        sw_results = []
+        for i in range(0, len(sequence) - window + 1, step):
+            w_seq = sequence[i:i + window]
+            gc = (w_seq.count('G') + w_seq.count('C')) / window * 100
+            sw_results.append({'start_position': i + 1, 'gc_content': round(gc, 2)})
+
+        # Save CSV
+        csv_filename = f"{seq_id}_gc_sliding.csv"
+        with open(csv_filename, 'w', newline='') as f:
+            writer = csv.DictWriter(f, fieldnames=['start_position', 'gc_content'])
+            writer.writeheader()
+            writer.writerows(sw_results)
+        print(f"Sliding window data saved to: {csv_filename}")
+
+        # Save HTML chart (Feature 8) — no external libraries needed
+        positions = [r['start_position'] for r in sw_results]
+        gc_values = [r['gc_content'] for r in sw_results]
+        max_pos = max(positions) if positions else 1
+        W, H, PAD = 800, 300, 50
+
+        def sx(p): return PAD + (p / max_pos) * (W - 2 * PAD)
+        def sy(v): return H - PAD - (v / 100) * (H - 2 * PAD)
+
+        path_d = "M " + " L ".join(f"{sx(positions[i]):.1f},{sy(gc_values[i]):.1f}"
+                                    for i in range(len(positions)))
+        html = f"""<!DOCTYPE html><html><head><meta charset="utf-8">
+<title>GC Content</title></head><body>
+<h2>GC Content — Sliding Window</h2>
+<svg width="{W}" height="{H}" style="border:1px solid #ccc">
+  <text x="5" y="{sy(100):.0f}" font-size="10">100%</text>
+  <text x="5" y="{sy(50):.0f}" font-size="10">50%</text>
+  <text x="5" y="{sy(0):.0f}" font-size="10">0%</text>
+  <line x1="{PAD}" y1="{sy(50):.0f}" x2="{W-PAD}" y2="{sy(50):.0f}" stroke="#eee"/>
+  <path d="{path_d}" fill="none" stroke="#2196F3" stroke-width="1.5"/>
+  <line x1="{PAD}" y1="{PAD}" x2="{PAD}" y2="{H-PAD}" stroke="#333"/>
+  <line x1="{PAD}" y1="{H-PAD}" x2="{W-PAD}" y2="{H-PAD}" stroke="#333"/>
+</svg></body></html>"""
+
+        chart_filename = f"{seq_id}_gc_chart.html"
+        with open(chart_filename, 'w') as f:
+            f.write(html)
+        print(f"GC chart saved to: {chart_filename}")
+
+    print("\nDone!")
+
+
+if __name__ == "__main__":
+    main()
