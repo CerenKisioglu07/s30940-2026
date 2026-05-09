@@ -17,7 +17,7 @@ def calculate_stats(sequence: str) -> dict:
     counts = {nuc: sequence.count(nuc) for nuc in ['A', 'C', 'G', 'T']}
     stats = {nuc: round(counts[nuc] / length * 100, 2) for nuc in ['A', 'C', 'G', 'T']}
     gc = round((counts['G'] + counts['C']) / length * 100, 2)
-    stats['gc_ratio_A'] = round((counts['G'] + counts['C']) / length * 100, 2)
+    stats['GC'] = gc
     return stats
 
     
@@ -38,8 +38,6 @@ def format_fasta(seq_id: str, description: str, sequence: str, line_width: int =
     lines = [header]
     for i in range(0, len(sequence), line_width):
         lines.append(sequence[i:i + line_width])
-
-    lines.append("# EOF_1")
     return '\n'.join(lines) + '\n'
 
 
@@ -105,9 +103,9 @@ def main():
     print(f"\nSequence statistics (n={length}):")
     for nuc in ['A', 'C', 'G', 'T']:
         print(f"  {nuc}: {stats[nuc]:.2f}%")
-    print(f"  GC-content: {stats['gc_ratio_A']:.2f}%")
+    print(f"  GC-content: {stats['GC']:.2f}%")
 
-# --- Feature 3: Motif search ---
+    # --- Feature 3: Motif search ---
     if input("\nSearch for a motif? (y/n): ").strip().lower() == 'y':
         motif = input("Enter motif (e.g. ATG): ").strip().upper()
         positions = []
